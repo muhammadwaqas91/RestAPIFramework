@@ -1,6 +1,6 @@
 # RestAPIFramework
 
-[![Swift](https://img.shields.io/badge/Swift-5.9_5.10_6.0-orange?style=flat-square)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-5.7-orange?style=flat-square)](https://swift.org)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS-yellowgreen?style=flat-square)](https://swift.org/platforms)
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://swift.org/package-manager)
 
