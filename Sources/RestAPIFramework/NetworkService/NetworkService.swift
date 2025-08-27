@@ -12,7 +12,7 @@ public class NetworkService: NetworkServiceProtocol {
 	public var responseValidator: ResponseValidator
 	public var dataParser: DataParser
 	public var urlSession: URLSession
-	init(responseValidator: ResponseValidator = HTTPURLResponseValidator(), dataParser: DataParser = DefaultJSONDecoder(), urlSession: URLSession = .shared) {
+	public init(responseValidator: ResponseValidator = HTTPURLResponseValidator(), dataParser: DataParser = DefaultJSONDecoder(), urlSession: URLSession = .shared) {
 		self.responseValidator = responseValidator
 		self.dataParser = dataParser
 		self.urlSession = urlSession
