@@ -100,7 +100,7 @@ struct MockRequest: Requestable {
 	var path: String = "/article"
 	var method: HTTPMethod { .GET }
 	var headers: [String: String]? { nil }
-	var queryItems: [URLQueryItem]? { nil }
+	var queryParameters: [String : String]? { nil }
 	var body: Data? { nil }
 }
 
