@@ -10,56 +10,18 @@ import XCTest
 
 final class RequestableTests: XCTestCase {
 	
-	struct GetRequest: Requestable {
-		typealias ResponseType = String
-		
-		var baseURL: String { "https://test.api" }
-		var path: String { "/get-data" }
-		var queryParameters: [String: String]? {
-			return ["param1": "value1", "param2": "value2"]
-		}
-	}
-	
-	struct PostRequest: Requestable {
-		typealias ResponseType = String
-		
-		var baseURL: String { "https://test.api" }
-		var path: String { "/create-resource" }
-		var method: HTTPMethod { .POST }
-		var body: Data? {
-			let json = ["name": "test_item", "value": 123] as [String : Any]
-			return try? JSONSerialization.data(withJSONObject: json)
-		}
-		var headers: [String: String]? {
-			return ["Content-Type": "application/json", "Authorization": "Bearer token"]
-		}
-	}
-	
-	struct DeleteRequest: Requestable {
-		typealias ResponseType = String
-		
-		var baseURL: String { "https://test.api" }
-		var path: String { "/delete-resource/123" }
-		var method: HTTPMethod { .DELETE }
-	}
-	
-	struct SimpleRequest: Requestable {
-		typealias ResponseType = String
-		
-		var baseURL: String { "https://simple.api" }
-		var path: String { "/hello" }
-	}
-	
-	struct InvalidRequest: Requestable {
-		typealias ResponseType = String
-		
-		var baseURL: String { "invalid-url-string" }
-		var path: String { "/path" }
-	}
-	
-	
 	
 	func testGetRequestCreation() throws {
+		struct GetRequest: Requestable {
+			typealias ResponseType = String
+			
+			var baseURL: String { "https://test.api" }
+			var path: String { "/get-data" }
+			var queryParameters: [String: String]? {
+				return ["param1": "value1", "param2": "value2"]
+			}
+		}
+		
 		let request = GetRequest()
 		let urlRequest = try request.asURLRequest()
 		
@@ -81,7 +43,56 @@ final class RequestableTests: XCTestCase {
 		XCTAssertEqual(queryParamsDict["param2"], "value2")
 	}
 	
-	func testPostRequestWithHeadersAndBody() throws {
+	func testPostRequestWithHeadersAndCreatingBody_UsingJSONSerialization() throws {
+		struct PostRequest: Requestable {
+			typealias ResponseType = String
+			
+			var baseURL: String { "https://test.api" }
+			var path: String { "/create-resource" }
+			var method: HTTPMethod { .POST }
+			var body: Data? {
+				let json = ["name": "test_item", "value": 123] as [String : Any]
+				return try? JSONSerialization.data(withJSONObject: json)
+			}
+			var headers: [String: String]? {
+				return ["Content-Type": "application/json", "Authorization": "Bearer token"]
+			}
+		}
+		
+		let request = PostRequest()
+		let urlRequest = try request.asURLRequest()
+		
+		XCTAssertEqual(urlRequest.httpMethod, "POST", "HTTP method should be POST")
+		XCTAssertNotNil(urlRequest.httpBody, "POST request should have a body")
+		XCTAssertEqual(urlRequest.allHTTPHeaderFields?["Content-Type"], "application/json", "Content-Type header should be set")
+		XCTAssertEqual(urlRequest.allHTTPHeaderFields?["Authorization"], "Bearer token", "Authorization header should be set")
+		
+		let bodyData = try XCTUnwrap(urlRequest.httpBody)
+		let jsonObject = try XCTUnwrap(try JSONSerialization.jsonObject(with: bodyData) as? [String: Any])
+		XCTAssertEqual(jsonObject["name"] as? String, "test_item")
+	}
+	
+	func testPostRequestWithHeadersAndCreatingBody_UsingJSONEncoding() throws {
+		struct TestItem: Encodable {
+			let name: String
+			let value: Int
+		}
+		
+		struct PostRequest: Requestable {
+			typealias ResponseType = String
+			
+			var baseURL: String { "https://test.api" }
+			var path: String { "/create-resource" }
+			var method: HTTPMethod { .POST }
+			var body: Data? {
+				let item = TestItem(name: "test_item", value: 42)
+				return try? DefaultJSONEncoder().encode(item)
+			}
+			var headers: [String: String]? {
+				return ["Content-Type": "application/json", "Authorization": "Bearer token"]
+			}
+		}
+		
 		let request = PostRequest()
 		let urlRequest = try request.asURLRequest()
 		
@@ -96,6 +107,14 @@ final class RequestableTests: XCTestCase {
 	}
 	
 	func testDeleteRequestCreation() throws {
+		struct DeleteRequest: Requestable {
+			typealias ResponseType = String
+			
+			var baseURL: String { "https://test.api" }
+			var path: String { "/delete-resource/123" }
+			var method: HTTPMethod { .DELETE }
+		}
+		
 		let request = DeleteRequest()
 		let urlRequest = try request.asURLRequest()
 		
@@ -105,6 +124,13 @@ final class RequestableTests: XCTestCase {
 	}
 	
 	func testSimpleRequestCreation() throws {
+		struct SimpleRequest: Requestable {
+			typealias ResponseType = String
+			
+			var baseURL: String { "https://simple.api" }
+			var path: String { "/hello" }
+		}
+		
 		let request = SimpleRequest()
 		let urlRequest = try request.asURLRequest()
 		
@@ -114,6 +140,13 @@ final class RequestableTests: XCTestCase {
 	}
 	
 	func testInvalidURL_ThrowsError() {
+		struct InvalidRequest: Requestable {
+			typealias ResponseType = String
+			
+			var baseURL: String { "invalid-url-string" }
+			var path: String { "/path" }
+		}
+		
 		let invalidRequest = InvalidRequest()
 		
 		XCTAssertThrowsError(try invalidRequest.asURLRequest()) { error in

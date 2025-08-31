@@ -126,6 +126,31 @@ final class NetworkServiceTests: XCTestCase {
 	
 	// MARK: - Test Cases
 	
+	/// Test for a invalid request
+	func testExecute_InvalidRequest_ThrowsError() async {
+		
+		struct InvalidRequest: Requestable {
+			typealias ResponseType = MockResponse
+			var baseURL: String { "invalid-url-string" }
+			var path: String { "/path" }
+		}
+
+		let request = InvalidRequest()
+
+		do {
+			_ = try await networkService.execute(request: request)
+			XCTFail("Expected RequestError.invalidURL to be thrown, but the call succeeded.")
+		} catch let error as RequestError {
+			guard error == .invalidURL else {
+				XCTFail("Expected RequestError.invalidURL but got a different error.")
+				return
+			}
+			XCTAssertEqual(error.errorDescription, "The URL provided is invalid.", "Failed to provide a clear error description")
+		} catch {
+			XCTFail("Expected RequestError.invalidURL, but got unexpected error: \(error).")
+		}
+	}
+
 	/// Test for a successful network request with a valid 200 response.
 	func testExecute_Success_ReturnsDecodedObject() async throws {
 		// 1. Arrange: Define the mock data and set the handler.

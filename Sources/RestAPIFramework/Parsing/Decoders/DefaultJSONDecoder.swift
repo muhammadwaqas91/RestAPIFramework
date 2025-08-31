@@ -15,10 +15,6 @@ public struct DefaultJSONDecoder: DataParser {
 	}
 	
 	public func parse<T: Decodable>(data: Data) throws -> T {
-		do {
-			return try decoder.decode(T.self, from: data)
-		} catch {
-			throw error
-		}
+		try decoder.decode(T.self, from: data)
 	}
 }

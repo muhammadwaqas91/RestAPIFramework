@@ -9,8 +9,18 @@ import XCTest
 import RestAPIFramework
 
 final class ResponseValidatorTests: XCTestCase {
+		
+	var validator: HTTPURLResponseValidator!
 	
-	let validator = HTTPURLResponseValidator()
+	override func setUp() {
+		super.setUp()
+		validator = HTTPURLResponseValidator()
+	}
+	
+	override func tearDown() {
+		validator = nil
+		super.tearDown()
+	}
 	
 	func testValidate_Success() throws {
 		let url = URL(string: "http://test.com")!

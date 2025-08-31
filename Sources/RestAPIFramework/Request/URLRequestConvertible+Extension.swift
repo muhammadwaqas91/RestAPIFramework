@@ -30,11 +30,12 @@ public extension URLRequestConvertible where Self: Requestable {
 		request.url = components.url
 		request.httpMethod = method.rawValue
 		request.allHTTPHeaderFields = headers
+		let payload = body
 		switch method {
 		case .GET, .DELETE:
 			request.httpBody = nil
 		default:
-			request.httpBody = body
+			request.httpBody = payload
 		}
 		
 		return request
